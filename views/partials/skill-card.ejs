@@ -1,0 +1,60 @@
+<div class="skill-card">
+    <div class="d-flex justify-content-between align-items-start mb-2">
+        <span class="skill-category"><%= skill.category %></span>
+        <span class="badge bg-<%= skill.type === 'teach' ? 'success' : 'info' %>">
+            <%= skill.type === 'teach' ? 'Teaching' : 'Learning' %>
+        </span>
+    </div>
+    
+    <h5>
+        <a href="/skills/<%= skill.id %>" class="text-decoration-none">
+            <%= skill.title %>
+        </a>
+    </h5>
+    
+    <p class="text-muted mb-3">
+        <%= skill.description.length > 100 ? 
+            skill.description.substring(0, 100) + '...' : 
+            skill.description %>
+    </p>
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <% if (skill.rating > 0) { %>
+                <div class="skill-rating">
+                    <% for (let i = 1; i <= 5; i++) { %>
+                        <i class="fas fa-star<%= i <= Math.floor(skill.rating) ? '' : '-o' %>"></i>
+                    <% } %>
+                    <span class="ms-1"><%= skill.rating %></span>
+                </div>
+            <% } else { %>
+                <span class="text-muted small">No ratings yet</span>
+            <% } %>
+        </div>
+        <span class="skill-level"><%= skill.level %></span>
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <% if (skill.price > 0) { %>
+                <strong class="text-primary">$<%= skill.price %>/hour</strong>
+            <% } else { %>
+                <strong class="text-success">Free</strong>
+            <% } %>
+        </div>
+        <small class="text-muted">
+            <%= new Date(skill.createdAt).toLocaleDateString() %>
+        </small>
+    </div>
+    
+    <div class="mt-3">
+        <a href="/skills/<%= skill.id %>" class="btn btn-primary btn-sm">
+            View Details
+        </a>
+        <% if (user && user.id !== skill.userId) { %>
+            <a href="/messages/new/<%= skill.userId %>" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-envelope me-1"></i>Message
+            </a>
+        <% } %>
+    </div>
+</div>

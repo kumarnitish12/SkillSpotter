@@ -1,0 +1,254 @@
+<% layout('layout') -%>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="fw-bold">Welcome back, <%= user.name %>!</h1>
+                    <p class="text-muted mb-0">Manage your skills and connections</p>
+                </div>
+                <a href="/skills/post/new" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Post New Skill
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dashboard Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-6">
+            <div class="dashboard-stat">
+                <h3><%= userSkills.length %></h3>
+                <p>Skills Posted</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="dashboard-stat">
+                <h3><%= userSkills.reduce((sum, skill) => sum + (skill.reviewCount || 0), 0) %></h3>
+                <p>Total Reviews</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="dashboard-stat">
+                <h3><%= recentMessages.length %></h3>
+                <p>Recent Messages</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="dashboard-stat">
+                <h3><%= userSkills.filter(skill => skill.rating > 0).length %></h3>
+                <p>Rated Skills</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- My Skills -->
+        <div class="col-lg-8">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold mb-0">
+                        <i class="fas fa-graduation-cap me-2 text-primary"></i>My Skills
+                    </h4>
+                    <a href="/profile/<%= user.id %>" class="btn btn-outline-primary btn-sm">
+                        View All
+                    </a>
+                </div>
+                
+                <% if (userSkills.length === 0) { %>
+                    <div class="empty-state">
+                        <i class="fas fa-plus-circle"></i>
+                        <h5>No Skills Posted Yet</h5>
+                        <p>Share your skills with the community to get started!</p>
+                        <a href="/skills/post/new" class="btn btn-primary">Post Your First Skill</a>
+                    </div>
+                <% } else { %>
+                    <div class="row">
+                        <% userSkills.slice(0, 4).forEach(skill => { %>
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="badge bg-primary"><%= skill.category %></span>
+                                            <span class="badge bg-<%= skill.type === 'teach' ? 'success' : 'info' %>">
+                                                <%= skill.type === 'teach' ? 'Teaching' : 'Learning' %>
+                                            </span>
+                                        </div>
+                                        <h6 class="card-title">
+                                            <a href="/skills/<%= skill.id %>" class="text-decoration-none">
+                                                <%= skill.title %>
+                                            </a>
+                                        </h6>
+                                        <p class="card-text text-muted small">
+                                            <%= skill.description.length > 80 ? 
+                                                skill.description.substring(0, 80) + '...' : 
+                                                skill.description %>
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <% if (skill.rating > 0) { %>
+                                                    <i class="fas fa-star text-warning"></i> <%= skill.rating %>
+                                                <% } else { %>
+                                                    No ratings yet
+                                                <% } %>
+                                            </small>
+                                            <small class="text-muted">
+                                                <%= new Date(skill.createdAt).toLocaleDateString() %>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                    
+                    <% if (userSkills.length > 4) { %>
+                        <div class="text-center mt-3">
+                            <a href="/profile/<%= user.id %>" class="btn btn-outline-primary">
+                                View All <%= userSkills.length %> Skills
+                            </a>
+                        </div>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="col-lg-4">
+            <!-- Recent Messages -->
+            <div class="dashboard-card mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-envelope me-2 text-primary"></i>Recent Messages
+                    </h5>
+                    <a href="/messages" class="btn btn-outline-primary btn-sm">View All</a>
+                </div>
+                
+                <% if (recentMessages.length === 0) { %>
+                    <div class="text-center py-3">
+                        <i class="fas fa-inbox text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2 mb-0">No messages yet</p>
+                        <small class="text-muted">Start connecting with other students!</small>
+                    </div>
+                <% } else { %>
+                    <% recentMessages.forEach(message => { %>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 35px; height: 35px; font-size: 0.8rem;">
+                                    M
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-1 small">
+                                    <%= message.content.length > 40 ? 
+                                        message.content.substring(0, 40) + '...' : 
+                                        message.content %>
+                                </p>
+                                <small class="text-muted">
+                                    <%= formatTime(message.createdAt) %>
+                                </small>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="dashboard-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-bolt me-2 text-warning"></i>Quick Actions
+                </h5>
+                
+                <div class="d-grid gap-2">
+                    <a href="/skills/post/new" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Post New Skill
+                    </a>
+                    <a href="/skills" class="btn btn-outline-primary">
+                        <i class="fas fa-search me-2"></i>Browse Skills
+                    </a>
+                    <a href="/profile/<%= user.id %>" class="btn btn-outline-secondary">
+                        <i class="fas fa-user me-2"></i>View My Profile
+                    </a>
+                    <a href="/messages" class="btn btn-outline-secondary">
+                        <i class="fas fa-envelope me-2"></i>Check Messages
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Performance Insights -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <h4 class="fw-bold mb-3">
+                    <i class="fas fa-chart-line me-2 text-success"></i>Your SkillSpot Journey
+                </h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Skills by Category</h6>
+                        <% 
+                        const skillsByCategory = {};
+                        userSkills.forEach(skill => {
+                            skillsByCategory[skill.category] = (skillsByCategory[skill.category] || 0) + 1;
+                        });
+                        %>
+                        
+                        <% if (Object.keys(skillsByCategory).length === 0) { %>
+                            <p class="text-muted">No skills posted yet</p>
+                        <% } else { %>
+                            <% Object.entries(skillsByCategory).forEach(([category, count]) => { %>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><%= category %></span>
+                                    <span class="badge bg-primary"><%= count %></span>
+                                </div>
+                            <% }); %>
+                        <% } %>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>Teaching vs Learning</h6>
+                        <% 
+                        const teachingSkills = userSkills.filter(skill => skill.type === 'teach').length;
+                        const learningSkills = userSkills.filter(skill => skill.type === 'learn').length;
+                        %>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Teaching</span>
+                            <span class="badge bg-success"><%= teachingSkills %></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Learning</span>
+                            <span class="badge bg-info"><%= learningSkills %></span>
+                        </div>
+                        
+                        <% if (teachingSkills === 0 && learningSkills === 0) { %>
+                            <p class="text-muted">Start posting skills to see insights!</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%
+function formatTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) { // Less than 1 minute
+        return 'Just now';
+    } else if (diff < 3600000) { // Less than 1 hour
+        return `${Math.floor(diff / 60000)}m ago`;
+    } else if (diff < 86400000) { // Less than 1 day
+        return `${Math.floor(diff / 3600000)}h ago`;
+    } else {
+        return date.toLocaleDateString();
+    }
+}
+%>

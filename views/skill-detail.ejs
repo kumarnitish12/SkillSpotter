@@ -1,0 +1,238 @@
+<% layout('layout') -%>
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/skills">Skills</a></li>
+            <li class="breadcrumb-item active"><%= skill.title %></li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Skill Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="skill-category"><%= skill.category %></span>
+                            <h1 class="fw-bold mt-2 mb-1"><%= skill.title %></h1>
+                            <div class="d-flex align-items-center">
+                                <% if (skill.rating > 0) { %>
+                                    <div class="skill-rating me-3">
+                                        <% for (let i = 1; i <= 5; i++) { %>
+                                            <i class="fas fa-star<%= i <= Math.floor(skill.rating) ? '' : '-o' %>"></i>
+                                        <% } %>
+                                        <span class="ms-1"><%= skill.rating %> (<%= skill.reviewCount %> reviews)</span>
+                                    </div>
+                                <% } %>
+                                <span class="badge bg-secondary"><%= skill.level %></span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <% if (skill.price > 0) { %>
+                                <h3 class="text-primary mb-0">$<%= skill.price %>/hour</h3>
+                            <% } else { %>
+                                <h3 class="text-success mb-0">Free</h3>
+                            <% } %>
+                            <small class="text-muted">
+                                <%= skill.type === 'teach' ? 'Teaching' : 'Looking to Learn' %>
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <h5 class="fw-bold mb-3">Description</h5>
+                    <p class="lead"><%= skill.description %></p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-sm-6">
+                            <small class="text-muted">Posted on</small>
+                            <p class="mb-0"><%= new Date(skill.createdAt).toLocaleDateString() %></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted">Last updated</small>
+                            <p class="mb-0"><%= new Date(skill.createdAt).toLocaleDateString() %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reviews Section -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-star me-2 text-warning"></i>
+                        Reviews (<%= reviews.length %>)
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <% if (user && user.id !== skill.userId) { %>
+                        <!-- Add Review Form -->
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <h6 class="fw-bold mb-3">Leave a Review</h6>
+                            <form action="/skills/<%= skill.id %>/review" method="POST">
+                                <div class="mb-3">
+                                    <label class="form-label">Rating</label>
+                                    <div class="star-rating">
+                                        <input type="hidden" name="rating" value="0">
+                                        <span class="star" data-rating="1">☆</span>
+                                        <span class="star" data-rating="2">☆</span>
+                                        <span class="star" data-rating="3">☆</span>
+                                        <span class="star" data-rating="4">☆</span>
+                                        <span class="star" data-rating="5">☆</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="comment" class="form-label">Comment</label>
+                                    <textarea class="form-control" id="comment" name="comment" rows="3" 
+                                              placeholder="Share your experience..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                            </form>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Reviews List -->
+                    <% if (reviews.length === 0) { %>
+                        <div class="empty-state">
+                            <i class="fas fa-comments"></i>
+                            <h5>No Reviews Yet</h5>
+                            <p>Be the first to review this skill!</p>
+                        </div>
+                    <% } else { %>
+                        <% reviews.forEach(review => { %>
+                            <% const reviewer = /* You'd need to get reviewer info */ null; %>
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="me-3">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            R
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Anonymous User</h6>
+                                        <div class="skill-rating">
+                                            <% for (let i = 1; i <= 5; i++) { %>
+                                                <i class="fas fa-star<%= i <= review.rating ? '' : '-o' %>"></i>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">
+                                        <%= new Date(review.createdAt).toLocaleDateString() %>
+                                    </small>
+                                </div>
+                                <p class="mb-0"><%= review.comment %></p>
+                            </div>
+                        <% }); %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Skill Owner Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                             style="width: 80px; height: 80px; font-size: 2rem; font-weight: bold;">
+                            <%= skillOwner.name.charAt(0).toUpperCase() %>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold"><%= skillOwner.name %></h5>
+                    <p class="text-muted mb-3"><%= skillOwner.college %> • Year <%= skillOwner.year %></p>
+                    
+                    <% if (user && user.id !== skill.userId) { %>
+                        <div class="d-grid gap-2">
+                            <a href="/messages/new/<%= skillOwner.id %>" class="btn btn-primary">
+                                <i class="fas fa-envelope me-2"></i>Send Message
+                            </a>
+                            <a href="/profile/<%= skillOwner.id %>" class="btn btn-outline-primary">
+                                <i class="fas fa-user me-2"></i>View Profile
+                            </a>
+                        </div>
+                    <% } else if (user && user.id === skill.userId) { %>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>This is your skill post
+                        </div>
+                    <% } else { %>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            <a href="/auth/login" class="alert-link">Sign in</a> to contact this user
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+            
+            <!-- Similar Skills -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2 text-warning"></i>Similar Skills
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Explore more skills in <%= skill.category %></p>
+                    <a href="/search?category=<%= skill.category %>" class="btn btn-outline-primary w-100">
+                        Browse <%= skill.category %> Skills
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.star-rating {
+    font-size: 1.5rem;
+    color: #ddd;
+    cursor: pointer;
+}
+
+.star-rating .star {
+    transition: color 0.2s;
+}
+
+.star-rating .star:hover,
+.star-rating .star.active {
+    color: #ffc107;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.star-rating .star');
+    const ratingInput = document.querySelector('input[name="rating"]');
+    
+    stars.forEach((star, index) => {
+        star.addEventListener('click', function() {
+            const rating = index + 1;
+            ratingInput.value = rating;
+            updateStars(rating);
+        });
+        
+        star.addEventListener('mouseover', function() {
+            updateStars(index + 1);
+        });
+    });
+    
+    document.querySelector('.star-rating').addEventListener('mouseleave', function() {
+        updateStars(ratingInput.value);
+    });
+    
+    function updateStars(rating) {
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.textContent = '★';
+                star.classList.add('active');
+            } else {
+                star.textContent = '☆';
+                star.classList.remove('active');
+            }
+        });
+    }
+});
+</script>

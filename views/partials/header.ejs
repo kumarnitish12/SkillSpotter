@@ -1,0 +1,70 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="fas fa-graduation-cap me-2"></i>SkillSpot
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/skills">Browse Skills</a>
+                </li>
+                <% if (user) { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/skills/post/new">Post Skill</a>
+                    </li>
+                <% } %>
+            </ul>
+            
+            <ul class="navbar-nav">
+                <% if (user) { %>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" 
+                           role="button" data-bs-toggle="dropdown">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                 style="width: 30px; height: 30px; font-size: 0.8rem; font-weight: bold;">
+                                <%= user.name.charAt(0).toUpperCase() %>
+                            </div>
+                            <%= user.name %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/profile/dashboard">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a></li>
+                            <li><a class="dropdown-item" href="/profile/<%= user.id %>">
+                                <i class="fas fa-user me-2"></i>My Profile
+                            </a></li>
+                            <li><a class="dropdown-item" href="/messages">
+                                <i class="fas fa-envelope me-2"></i>Messages
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="/auth/logout" method="POST" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-primary text-white ms-2 px-3" href="/auth/register">
+                            Sign Up
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>

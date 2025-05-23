@@ -1,0 +1,204 @@
+<% layout('layout') -%>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>Post a New Skill
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <% if (error) { %>
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i><%= error %>
+                        </div>
+                    <% } %>
+                    
+                    <form action="/skills/post/new" method="POST" class="needs-validation" novalidate>
+                        <div class="mb-4">
+                            <label for="title" class="form-label">Skill Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   placeholder="e.g., Python Programming, Guitar Lessons, Essay Writing" required>
+                            <div class="invalid-feedback">
+                                Please provide a clear skill title.
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="category" class="form-label">Category *</label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="">Select a category</option>
+                                    <% categories.forEach(category => { %>
+                                        <option value="<%= category %>"><%= category %></option>
+                                    <% }); %>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a category.
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="level" class="form-label">Skill Level *</label>
+                                <select class="form-select" id="level" name="level" required>
+                                    <option value="">Select level</option>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select your skill level.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Description *</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" 
+                                      placeholder="Describe what you'll teach or what you want to learn. Include your experience, teaching style, or specific goals."
+                                      data-max-length="500" required></textarea>
+                            <div class="invalid-feedback">
+                                Please provide a detailed description.
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <label for="type" class="form-label">Type *</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="type" id="teach" value="teach" required>
+                                    <label class="form-check-label" for="teach">
+                                        <strong>I can teach this skill</strong>
+                                        <br><small class="text-muted">Share your knowledge with others</small>
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="radio" name="type" id="learn" value="learn" required>
+                                    <label class="form-check-label" for="learn">
+                                        <strong>I want to learn this skill</strong>
+                                        <br><small class="text-muted">Find someone to teach you</small>
+                                    </label>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please select whether you want to teach or learn.
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="price" class="form-label">Price per Hour</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="price" name="price" 
+                                           min="0" step="0.01" placeholder="0.00">
+                                </div>
+                                <small class="form-text text-muted">Leave empty for free</small>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Tips for a great skill post:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Be specific about what you offer or need</li>
+                                <li>Mention your experience level</li>
+                                <li>Include any prerequisites or requirements</li>
+                                <li>Be honest about your availability</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="/skills" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Post Skill
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Real-time preview
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const categorySelect = document.getElementById('category');
+    const levelSelect = document.getElementById('level');
+    const typeInputs = document.querySelectorAll('input[name="type"]');
+    
+    // Character counter is handled by main.js
+    
+    // Form validation enhancement
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function(e) {
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Focus on first invalid field
+            const firstInvalid = form.querySelector(':invalid');
+            if (firstInvalid) {
+                firstInvalid.focus();
+            }
+        }
+        form.classList.add('was-validated');
+    });
+    
+    // Auto-save to localStorage
+    function saveFormData() {
+        const formData = {
+            title: titleInput.value,
+            description: descriptionInput.value,
+            category: categorySelect.value,
+            level: levelSelect.value,
+            type: document.querySelector('input[name="type"]:checked')?.value || '',
+            price: document.getElementById('price').value
+        };
+        localStorage.setItem('skillFormData', JSON.stringify(formData));
+    }
+    
+    function loadFormData() {
+        const saved = localStorage.getItem('skillFormData');
+        if (saved) {
+            const data = JSON.parse(saved);
+            titleInput.value = data.title || '';
+            descriptionInput.value = data.description || '';
+            categorySelect.value = data.category || '';
+            levelSelect.value = data.level || '';
+            document.getElementById('price').value = data.price || '';
+            
+            if (data.type) {
+                const typeInput = document.querySelector(`input[name="type"][value="${data.type}"]`);
+                if (typeInput) typeInput.checked = true;
+            }
+        }
+    }
+    
+    // Load saved data on page load
+    loadFormData();
+    
+    // Save data on input changes
+    [titleInput, descriptionInput, categorySelect, levelSelect].forEach(input => {
+        input.addEventListener('input', saveFormData);
+    });
+    
+    typeInputs.forEach(input => {
+        input.addEventListener('change', saveFormData);
+    });
+    
+    document.getElementById('price').addEventListener('input', saveFormData);
+    
+    // Clear saved data on successful submit
+    form.addEventListener('submit', function(e) {
+        if (form.checkValidity()) {
+            localStorage.removeItem('skillFormData');
+        }
+    });
+});
+</script>
