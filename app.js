@@ -1,17 +1,15 @@
 const express = require('express');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// Import routes
-const indexRoutes = require('./routes/index');
-const authRoutes = require('./routes/auth');
-const skillsRoutes = require('./routes/skills');
-const profileRoutes = require('./routes/profile');
-const messagesRoutes = require('./routes/messages');
+// MongoDB URI (set this in your .env file)
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/skillspot';
 
 // Set view engine
 app.set('view engine', 'ejs');
@@ -24,13 +22,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session configuration
+// Session configuration using MongoDB
 app.use(session({
     secret: process.env.SESSION_SECRET || 'skillspot-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { 
-        secure: false, // Set to true in production with HTTPS
+    store: MongoStore.create({
+        mongoUrl: MONGODB_URI,
+        ttl: 24 * 60 * 60, // 1 day
+    }),
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // True in production with HTTPS
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
@@ -41,6 +43,13 @@ app.use((req, res, next) => {
     next();
 });
 
+// Import routes
+const indexRoutes = require('./routes/index');
+const authRoutes = require('./routes/auth');
+const skillsRoutes = require('./routes/skills');
+const profileRoutes = require('./routes/profile');
+const messagesRoutes = require('./routes/messages');
+
 // Routes
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
@@ -48,7 +57,7 @@ app.use('/skills', skillsRoutes);
 app.use('/profile', profileRoutes);
 app.use('/messages', messagesRoutes);
 
-// Error handling middleware
+// 404 Error handler
 app.use((req, res, next) => {
     res.status(404).render('layout', {
         title: 'Page Not Found',
@@ -56,6 +65,7 @@ app.use((req, res, next) => {
     });
 });
 
+// 500 Error handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).render('layout', {
