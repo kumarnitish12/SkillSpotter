@@ -38,7 +38,13 @@ router.post('/login', (req, res) => {
         year: user.year
     };
     
-    res.redirect('/dashboard');
+    req.session.save(err => {
+        if (err) {
+            console.error('Session save error:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.redirect('/dashboard');
+    });
 });
 
 // Register page
@@ -83,7 +89,13 @@ router.post('/register', (req, res) => {
         year: newUser.year
     };
     
-    res.redirect('/dashboard');
+    req.session.save(err => {
+        if (err) {
+            console.error('Session save error:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.redirect('/dashboard');
+    });
 });
 
 // Logout

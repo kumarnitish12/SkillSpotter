@@ -9,6 +9,9 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+// Trust first proxy (important for secure cookies on Vercel)
+app.set('trust proxy', 1);
+
 // MongoDB URI from env
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/skillspot';
 
@@ -48,7 +51,9 @@ app.use(session({
   store: mongoStore,
   cookie: {
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   },
 }));
 
